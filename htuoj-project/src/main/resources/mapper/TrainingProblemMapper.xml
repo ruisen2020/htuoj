@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.TrainingProblemMapper">
+
+    <select id="getProblemListByTrainingId" resultType="org.example.htuoj.common.dto.resp.TrainingProblemGetProblemListRespDTP"
+            parameterType="org.example.htuoj.common.dto.req.TrainingProblemGetProblemListReqDTO">
+        SELECT t1.problemId,
+               tp.`order`            AS `order`,
+               p.accept_count     AS acceptCount,
+               p.submit_count     AS submitCount,
+               p.title,
+               p.difficulty_level AS difficultyLevel,
+               t1.labels,
+               t2.sources,
+               accept_status.status
+        FROM training_problem tp
+                 LEFT JOIN problem p ON tp.problem_id = p.id AND p.del_flag = 0
+                 LEFT JOIN (
+            -- 这里是处理标签的子查询结果
+            SELECT p.id                       AS problemId,
+                   GROUP_CONCAT(l.label_name) AS labels
+            FROM problem p
+                     LEFT JOIN problem_label_relations pl ON pl.problem_id = p.id AND p.del_flag = 0 AND pl.del_flag = 0
+                     LEFT JOIN label l ON pl.label_id = l.id AND l.del_flag = 0
+            WHERE p.del_flag = 0
+            GROUP BY p.id) t1 ON t1.problemId = p.id
+                 LEFT JOIN (
+            -- 这里是处理来源的子查询结果
+            SELECT p.id                        AS problemId,
+                   GROUP_CONCAT(s.source_name) AS sources
+            FROM problem p
+                     LEFT JOIN problem_source_relations ps
+                               ON ps.problem_id = p.id AND p.del_flag = 0 AND ps.del_flag = 0
+                     LEFT JOIN source s ON ps.source_id = s.id AND s.del_flag = 0
+            WHERE p.del_flag = 0
+            GROUP BY p.id) t2 ON t2.problemId = p.id
+                 LEFT JOIN accept_status ON accept_status.problem_id = p.id AND accept_status.user_id = #{userId} AND
+                                            accept_status.del_flag = 0
+        WHERE tp.del_flag = 0
+          AND tp.training_id = #{trainingId}
+        GROUP BY p.id, accept_status.status
+    </select>
+</mapper>

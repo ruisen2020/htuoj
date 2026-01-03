@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.CollectMapper">
+
+    <select id="getCollectListByUseId"
+            resultType="org.example.htuoj.common.dto.resp.CollectGetCollectListByUseIdRespDTO"
+            parameterType="org.example.htuoj.common.dto.req.CollectGetCollectListByUserIdReqDTO">
+        select c.collect_id,
+               u.user_name                                     as userName,
+               u.avatar,
+               a.article_id                                    as articleId,
+               a.title,
+               a.like_count                                    as likeCount,
+               case when l.state = 0 then true else false end  as isLike,
+               a.collect_count                                 as collectCount,
+               case when c1.state = 0 then true else false end as isCollect,
+               a.comment_count                                 as commentCount,
+               a.watch_count                                   as watchCount,
+               a.cover_url                                     as coverUrl,
+               a.category_id                                   as categoryId,
+               a.create_time                                   as createTime,
+               a.problem_id                                    as problemId,
+               problem.title                                   as problemTitle
+        from collect c
+                 left join article a on c.target_id = a.article_id and a.del_flag = 0
+                 left join user u on a.user_id = u.id
+                 left join problem on a.problem_id = problem.id and problem.del_flag = 0
+                 left join `like` l on l.user_id = #{myUserId} and l.target_type = 0 and l.target_id = a.article_id
+            and l.del_flag = 0
+                 left join collect c1
+                           on c1.user_id = #{myUserId} and c1.target_type = 0 and c1.target_id = c.target_id and
+                              c.del_flag = 0
+        where c.user_id = #{userId}
+          and c.target_type = 0
+          and c.state = 0
+
+        order by a.create_time
+                desc
+    </select>
+</mapper>

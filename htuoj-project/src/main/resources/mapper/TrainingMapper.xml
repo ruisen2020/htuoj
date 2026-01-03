@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.TrainingMapper">
+
+    <select id="getOfficialTrainingList" resultType="org.example.htuoj.common.dto.resp.TrainingGetOfficialTrainingListRespDTO"
+            parameterType="org.example.htuoj.common.dto.req.TrainingGetOfficialTrainingListReqDTO">
+        select t.training_id                 as trainingId,
+               t.title,
+               t.description,
+               t.collect_count               as collectCount,
+               t.problem_count               as problemCount,
+               t.priority,
+               u.id                          as userId,
+               u.user_name                   as userName,
+               case when c.state = 0 then true else false end          as isCollect,
+               count(accept_status.status)   as completionRate,
+               -- 计算难度等级为 0 的数量
+               SUM(CASE WHEN p.difficulty_level = 0 THEN 1 ELSE 0 END) AS easyCount,
+               -- 计算难度等级为 1 的数量
+               SUM(CASE WHEN p.difficulty_level = 1 THEN 1 ELSE 0 END) AS mediumCount,
+               -- 计算难度等级为 2 的数量
+               SUM(CASE WHEN p.difficulty_level = 2 THEN 1 ELSE 0 END) AS hardCount
+        from training t
+                 left join user u on t.user_id = u.id
+                 left join training_problem tp on t.training_id = tp.training_id and tp.del_flag = 0
+                 left join accept_status
+                           on tp.problem_id = accept_status.problem_id and accept_status.user_id = #{userId} and
+                              accept_status.status = 1 and accept_status.del_flag = 0
+                 left join problem p on tp.problem_id = p.id and p.del_flag = 0
+                 left join collect c on c.target_type = 2 and t.training_id = c.target_id and c.user_id = #{userId} and
+                                        c.del_flag = 0
+        where t.type = #{type}
+          and t.state = 0
+          and t.del_flag = 0
+        group by t.training_id, t.priority
+        order by t.priority
+    </select>
+    <select id="getTrainingList" resultType="org.example.htuoj.common.dto.resp.TrainingGetListRespDTO"
+            parameterType="org.example.htuoj.common.dto.req.TrainingGetListReqDTO">
+        select t.training_id                                  as trainingId,
+               t.title,
+               t.description,
+               t.collect_count                                as collectCount,
+               t.problem_count                                as problemCount,
+               case when c.state = 0 then true else false end as isCollect
+        from training t
+                 left join collect c on c.target_type = 2 and t.training_id = c.target_id and c.user_id = #{myUserId}
+            and c.del_flag = 0
+        where t.user_id = #{userId}
+          and t.state = 0
+          and t.del_flag = 0
+        order by t.create_time desc
+    </select>
+    <select id="getTrainingListByCollect"
+            resultType="org.example.htuoj.common.dto.resp.TrainingGetListRespDTO">
+        select t.training_id                                   as trainingId,
+               t.title,
+               t.description,
+               t.collect_count                                 as collectCount,
+               t.problem_count                                 as problemCount,
+               case when c1.state = 0 then true else false end as isCollect
+        from training t
+                 left join collect c on c.target_type = 2 and t.training_id = c.target_id and c.user_id = #{userId} and
+                                        c.del_flag = 0
+                 left join collect c1
+                           on c1.target_type = 2 and t.training_id = c1.target_id and c1.user_id = #{myUserId} and
+                              c1.del_flag = 0
+        where t.state = 0
+          and t.del_flag = 0
+          and c.state = 0
+
+        order by t.create_time desc
+    </select>
+    <select id="getTrainingInfo"
+            resultType="org.example.htuoj.common.dto.resp.TrainingGetTrainingInfoRespDTO">
+        select t.training_id                                           as trainingId,
+               t.title,
+               t.description,
+               t.collect_count                                         as collectCount,
+               t.problem_count                                         as problemCount,
+               u.id                                                    as userId,
+               u.user_name                                             as userName,
+               t.type,
+               case when c.state = 0 then true else false end          as isCollect,
+#                count(accept_status.status)                             as completionRate,
+               -- 计算难度等级为 0 的数量
+               SUM(CASE WHEN p.difficulty_level = 0 THEN 1 ELSE 0 END) AS easyCount,
+               -- 计算难度等级为 1 的数量
+               SUM(CASE WHEN p.difficulty_level = 1 THEN 1 ELSE 0 END) AS mediumCount,
+               -- 计算难度等级为 2 的数量
+               SUM(CASE WHEN p.difficulty_level = 2 THEN 1 ELSE 0 END) AS hardCount
+        from training t
+                 left join user u on t.user_id = u.id
+                 left join training_problem tp on t.training_id = tp.training_id and tp.del_flag = 0
+                 left join problem p on tp.problem_id = p.id and p.del_flag = 0
+                 left join collect c on c.target_type = 2 and t.training_id = c.target_id and c.user_id = #{userId} and
+                                        c.del_flag = 0
+        where t.training_id = #{trainingId}
+          and t.state = 0
+          and t.del_flag = 0
+    </select>
+</mapper>

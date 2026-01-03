@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.FollowMapper">
+
+    <select id="getFollowList" resultType="org.example.htuoj.common.dto.resp.UserGetAllRespDTO">
+        select u.id    as userId,
+               u.number,
+               u.user_name,
+               u.avatar,
+               u.profile,
+               CASE
+                   WHEN fans.userId IS NOT NULL THEN 'true'
+                   ELSE 'false'
+                   END AS isFollowingMe,
+               CASE
+                   WHEN followByme.userId IS NOT NULL THEN 'true'
+                   ELSE 'false'
+                   END AS isFollowedByMe
+        from follow f
+                 left join user u on f.follow_to = u.id
+                 left join (select u.id as userId
+                            from follow f
+                                     left join user u on f.follow_form = u.id
+                            where f.follow_to = #{myUserId}
+                              and u.del_flag = 0
+                              and f.del_flag = 0) fans on (fans.userId = u.id)
+                 left join (select u.id as userId
+                            from follow f
+                                     left join user u on f.follow_to = u.id
+                            where f.follow_form = #{myUserId}
+                              and u.del_flag = 0
+                              and f.del_flag = 0) followByme on followByme.userId = u.id
+        where f.follow_form = #{userId}
+          and u.del_flag = 0
+          and f.del_flag = 0;
+    </select>
+    <select id="getFansList" resultType="org.example.htuoj.common.dto.resp.UserGetAllRespDTO">
+        select u.id    as userId,
+               u.number,
+               u.user_name,
+               u.avatar,
+               u.profile,
+               CASE
+                   WHEN fans.userId IS NOT NULL THEN 'true'
+                   ELSE 'false'
+                   END AS isFollowingMe,
+               CASE
+                   WHEN followByme.userId IS NOT NULL THEN 'true'
+                   ELSE 'false'
+                   END AS isFollowedByMe
+        from follow f
+                 left join user u on f.follow_form = u.id
+                 left join (select u.id as userId
+                            from follow f
+                                     left join user u on f.follow_form = u.id
+                            where f.follow_to = #{myUserId}
+                              and u.del_flag = 0
+                              and f.del_flag = 0) fans on (fans.userId = u.id)
+                 left join (select u.id as userId
+                            from follow f
+                                     left join user u on f.follow_to = u.id
+                            where f.follow_form = #{myUserId}
+                              and u.del_flag = 0
+                              and f.del_flag = 0) followByme on followByme.userId = u.id
+        where f.follow_to = #{userId}
+          and u.del_flag = 0
+          and f.del_flag = 0
+    </select>
+
+</mapper>

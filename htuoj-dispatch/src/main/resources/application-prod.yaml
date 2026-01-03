@@ -1,0 +1,46 @@
+#spring:
+#  cloud:
+#    nacos:
+#      discovery:
+#        access-key: nacos
+#  application:
+#    name: htuoj-dispatch
+server:
+  port: 9003
+
+feign:
+  okhttp:
+    enabled: true # 开启OKHttp功能
+  client:
+    config:
+      default:
+        connect-timeout: 5000000
+        read-timeout: 1000000
+
+#spring:
+#  main:
+#    web-application-type: reactive
+
+logging:
+  config: classpath:logback.xml
+
+xxl:
+  job:
+    admin:
+      addresses:
+    accessToken: default_token
+    executor:
+      appName: xxl-job-executor-sample1
+      address:
+      ip:
+      port: 9111
+      logPath: /data/applogs/xxl-job/jobhandler
+      logRetentionDays: 30
+
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr:
+  application:
+    name: htuoj-dispatch

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.CommentMapper">
+
+    <select id="getCommentList" resultType="org.example.htuoj.common.dto.resp.CommentGetListRespDTO">
+        SELECT c.comment_id as commentId,
+        c.article_id as articleId,
+        c.user_id as userId,
+        u.avatar,
+        u.user_name as userName,
+        c.content,
+        c.parent_id as parentId,
+        c.child_count as childCount,
+        c.like_count as likeCount,
+        c.create_time as createTime,
+        case
+        when l.state = 0
+        then true
+        else
+        false
+        end as isLike
+        FROM comment c
+        LEFT JOIN user u ON c.user_id = u.id and u.del_flag = 0
+        left join `like` l on l.user_id = #{userId} and l.target_type = #{targetType} and l.target_id = c.comment_id and
+        l.del_flag = 0
+        <where>
+            c.article_id = #{articleId}
+            AND c.del_flag = 0
+            AND c.state = 0
+            <if test="commentId != null">
+                and c.parent_id = #{commentId}
+            </if>
+            <if test="commentId == null">
+                and c.parent_id is null
+            </if>
+        </where>
+        ORDER BY c.create_time DESC
+    </select>
+</mapper>

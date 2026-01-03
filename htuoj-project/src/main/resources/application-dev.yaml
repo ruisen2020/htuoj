@@ -1,0 +1,117 @@
+server:
+  port: 9002
+  tomcat:
+    connection-timeout: 6000
+ai:
+  api:
+    key:
+feign:
+  sentinel:
+    enabled: true # 开启feign对sentinel的支持
+spring:
+  rabbitmq:
+    host:
+    port: 5672
+    virtual-host:
+    username:
+    password:
+
+  cloud:
+    nacos:
+      server-addr:
+    sentinel:
+      transport:
+        dashboard:
+        port: 8719
+
+
+
+  application:
+    name: htuoj-project
+  datasource:
+    # ShardingSphere 对 Driver 自定义，实现分库分表等隐藏逻辑
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    # ShardingSphere 配置文件路径
+    url: jdbc:shardingsphere:classpath:shardingsphere-config-dev.yaml
+
+    # 连接池配置
+    # hikari是一个Java数据库连接池工具，用于管理和复用数据库连接
+    hikari:
+      connection-test-query: select 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      maximum-pool-size: 5
+      minimum-idle: 5
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+
+
+  redis:
+    host:
+    port: 6379
+    password:
+
+
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+aliyun:
+  oss:
+    endpoint:  # OSS服务的访问域名
+    access-key-id:  # 用户的Access Key ID
+    access-key-secret:  # 用户的Access Key Secret
+    bucket-name:  # Bucket名称
+
+  mail:
+    # 你的accessKeyId
+    accessKeyId:
+    # 你的accessKeySecret
+    accessKeySecret:
+    # 账号，即发信地址
+    accountName:
+    # accountName的类型，0为随机账号，1为发信地址
+    addressType: 1
+    # 别名
+    fromAlias: HTUOJ
+    # 邮件主题
+    subject: 验证码邮件
+
+
+
+jwt:
+  expire: 86400
+  secret:
+
+logging:
+  level:
+    com.htuoj: error
+
+
+
+
+############## Sa-Token 配置 (文档: https://sa-token.cc) ##############
+sa-token:
+  # token 名称（同时也是 cookie 名称）
+  token-name: satoken
+  # token 有效期（单位：秒） 默认30天，-1 代表永久有效
+  timeout: 2592000
+  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
+  active-timeout: -1
+  # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
+  is-concurrent: true
+  # 在多人登录同一账号时，是否共用一个 token （为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）
+  is-share: false
+  # token 风格（默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik）
+  token-style: uuid
+  # 是否输出操作日志
+  is-log: true
+
+
+htuoj:
+  python: "python3"
+  path: htuoj/htuoj-project/src/main/java/org/example/htuoj/project/crawler/

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.LikeMapper">
+
+    <insert id="addLike">
+        INSERT INTO `like` (user_id, target_type, target_id, state, create_time, update_time)
+        VALUES (#{userId}, #{targetType}, #{targetId}, #{isLike}, #{createTime}, #{updateTime}) ON DUPLICATE KEY
+        UPDATE state = VALUES(state),
+            update_time = VALUES(update_time);
+
+    </insert>
+</mapper>

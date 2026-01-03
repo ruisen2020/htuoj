@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.UserMapper">
+
+    <select id="getAll" resultType="org.example.htuoj.common.dto.resp.UserGetUserInfoRespDTO">
+        select u.id,
+        u.number,
+        u.user_name as userName,
+        u.gender,
+        s.school_name as schoolName,
+        u.profile,
+        u.avatar,
+        u.last_login_time as lastLoginTime,
+        up.accept_count as acceptCount
+        from user u
+        left join user_preferences up on up.user_id = u.id
+        left join school s on u.school_id = s.school_id
+        <where>
+
+            <if test="userName!= null and userName!= ''">
+                and u.user_name like concat('%', #{userName}, '%')
+            </if>
+            <if test="schoolId != null and schoolId!= ''">
+                and s.school_id = #{schoolId}
+            </if>
+            <if test="number!= null and number!= ''">
+                and u.number like concat('%', #{number}, '%')
+            </if>
+        </where>
+        <if test="orderBy != null and orderBy != ''">
+            <if test="orderBy =='acceptCount' ">
+                order by up.accept_count desc
+            </if>
+            <if test="orderBy =='lastLoginTime' ">
+                order by u.last_login_time desc
+            </if>
+            , u.id desc
+        </if>
+    </select>
+    <select id="getUserTopList" resultType="org.example.htuoj.common.dto.resp.UserGetUserTopListRespDTO"
+            parameterType="org.example.htuoj.common.dto.req.UserGetUserTopListReqDTO">
+        select u.id as userId,
+        u.user_name as userName,
+        u.avatar,
+        up.accept_count as acceptCount
+        from user u
+        left join user_preferences up on up.user_id = u.id
+        order by up.accept_count desc
+    </select>
+</mapper>

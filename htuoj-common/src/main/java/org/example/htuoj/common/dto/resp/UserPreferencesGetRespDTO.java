@@ -1,0 +1,77 @@
+package org.example.htuoj.common.dto.resp;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+@Data
+public class UserPreferencesGetRespDTO {
+
+    @ApiModelProperty(value = "通过简单题总数")
+    private Integer acceptEasyCount;
+
+    @ApiModelProperty(value = "通过中等题总数")
+    private Integer acceptMediumCount;
+
+    @ApiModelProperty(value = "通过困难题总数")
+    private Integer acceptHardCount;
+
+    @ApiModelProperty(value = "codeforces用户名")
+    private String codeforcesUserName;
+
+    @ApiModelProperty(value = "牛客用户ID")
+    private String nowcoderUserId;
+
+    @ApiModelProperty(value = "力扣用户名")
+    private String leetcodeUserName;
+
+    @ApiModelProperty(value = "洛谷用户ID")
+    private String luoguUserId;
+
+    @ApiModelProperty(value = "acwing用户ID")
+    private String acwingUserId;
+
+    @ApiModelProperty(value = "atcoder用户名")
+    private String atcoderUserName;
+
+    @ApiModelProperty(value = "coderforces通过题数")
+    private Integer codeforcesAcceptCount;
+
+    @ApiModelProperty(value = "牛客通过题数")
+    private Integer nowcoderAcceptCount;
+
+    @ApiModelProperty(value = "leetcode通过题数")
+    private Integer leetcodeAcceptCount;
+
+    @ApiModelProperty(value = "luogu通过题数")
+    private Integer luoguAcceptCount;
+
+    @ApiModelProperty(value = "atcoder通过题数")
+    private Integer  atcoderAcceptCount;
+
+    @ApiModelProperty(value = "acwing通过题数")
+    private Integer acwingAcceptCount;
+
+    @ApiModelProperty(value = "codeforces排名")
+    private Integer codeforcesRating;
+
+    @ApiModelProperty(value = "牛客排名")
+    private Integer nowcoderRating;
+
+    @ApiModelProperty(value = "leetcode排名")
+    private Integer leetcodeRating;
+
+    @ApiModelProperty(value = "洛谷排名")
+    private Integer luoguRating;
+
+    @ApiModelProperty(value = "acwing排名")
+    private Integer acwingRating;
+
+    @ApiModelProperty(value = "atcoder排名")
+    private Integer atcoderRating;
+
+    @ApiModelProperty(value = "博客地址")
+    private String blog;
+
+    @ApiModelProperty(value = "github仓库地址")
+    private String github;
+}

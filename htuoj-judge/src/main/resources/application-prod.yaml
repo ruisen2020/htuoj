@@ -1,0 +1,85 @@
+server:
+  port: 9004
+dubbo:
+  registry:
+    # 注册中心地址 采用nacos
+    address:
+    # 分组
+    group: DUBBO_TEST
+  protocol:
+    # 协议选择  这里选择dubbo
+    name: dubbo
+    # 通信端口
+    port: 22223
+  application:
+    # 应用名称 服务名即可
+    name: dubbo-producer
+  scan:
+    # 需要暴露接口的包名(可以理解为mybatis中扫描mapper)
+    base-packages: com.example.htuoj.judge.service
+spring:
+  rabbitmq:
+    host:
+    port: 5672
+    virtual-host:
+    username:
+    password:
+
+  cloud:
+    nacos:
+      server-addr: 8.152.217.65:8848
+  application:
+    name: htuoj-judge
+  datasource:
+    # ShardingSphere 对 Driver 自定义，实现分库分表等隐藏逻辑
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    # ShardingSphere 配置文件路径
+    url: jdbc:shardingsphere:classpath:shardingsphere-config-dev.yaml
+    # 连接池配置
+    # hikari是一个Java数据库连接池工具，用于管理和复用数据库连接
+    hikari:
+      connection-test-query: select 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      maximum-pool-size: 5
+      minimum-idle: 5
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+    default-encoding: UTF-8
+
+  redis:
+    host:
+    port: 6379
+    password:
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+aliyun:
+  oss:
+    endpoint:  # OSS服务的访问域名
+    access-key-id:  # 用户的Access Key ID
+    access-key-secret:  # 用户的Access Key Secret
+    bucket-name:  # Bucket名称
+
+
+
+htuoj:
+  ip:
+  path: "htuoj-judge/src/main/java/org/example/htuoj/judge/case/"

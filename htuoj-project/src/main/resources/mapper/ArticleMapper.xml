@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.ArticleMapper">
+    <select id="addArticleDoc" resultType="org.example.htuoj.common.dao.ArticleDoc">
+        select a.article_id    as articleId,
+               a.title,
+               a.content,
+               a.user_id       as userId,
+               u.user_name     as userName,
+               u.avatar,
+               a.like_count    as likeCount,
+               a.collect_count as collectCount,
+               a.comment_count as commentCount,
+               a.watch_count   as watchCount,
+               a.cover_url     as coverUrl,
+               a.category_id   as categoryId
+        from article a
+                 left join user u on a.user_id = u.id
+        where article_id = #{articleId} and a.del_flag = 0
+    </select>
+
+    <select id="getArticleList" resultType="org.example.htuoj.common.dto.resp.ArticleGetArticleListRespDTO">
+        select a.article_id as articleId,
+        a.title,
+        a.content,
+        a.user_id as userId,
+        u.user_name as userName,
+        u.avatar,
+        a.like_count as likeCount,
+        case when l.state = 0 then true else false end as isLike,
+        a.collect_count as collectCount,
+        case when c.state = 0 then true else false end as isCollect,
+        a.comment_count as commentCount,
+        a.watch_count as watchCount,
+        a.cover_url as coverUrl,
+        a.category_id as categoryId
+        from article a
+        left join user u on a.user_id = u.id
+        left join `like` l on l.user_id = #{userId} and l.target_type = #{targetType} and l.target_id = a.article_id and
+        l.del_flag = 0
+        left join collect c on c.user_id = #{userId} and c.target_type = #{targetType} and c.target_id = a.article_id and c.del_flag = 0
+        <where>
+            a.del_flag = 0
+            <if test="categoryId != null and categoryId !=''">
+                and a.category_id = #{categoryId}
+            </if>
+        </where>
+        order by a.create_time desc
+    </select>
+    <select id="getArticleById" resultType="org.example.htuoj.common.dto.resp.ArticleGetArticleByIdRespDTO">
+        select a.article_id as articleId,
+        a.title,
+        a.content,
+        a.user_id as userId,
+        u.user_name as userName,
+        u.avatar,
+        a.like_count as likeCount,
+        case when l.state = 0 then true else false end as isLike,
+        a.collect_count as collectCount,
+        case when c.state = 0 then true else false end as isCollect,
+        a.comment_count as commentCount,
+        a.watch_count as watchCount,
+        a.cover_url as coverUrl,
+        a.category_id as categoryId,
+        a.create_time as createTime,
+        a.update_time as updateTime,
+        case when f.state = 0 then true else false end as isFollow,
+        a.problem_id as problemId
+        from article a
+        left join user u on a.user_id = u.id
+        left join `like` l on l.user_id = #{userId} and l.target_type = #{targetType} and l.target_id = a.article_id and
+        l.del_flag = 0
+        left join collect c on c.user_id = #{userId} and c.target_type = #{targetType} and c.target_id = a.article_id
+        and c.del_flag = 0
+        left join follow f on f.follow_to = a.user_id and f.follow_form = #{userId} and f.del_flag = 0
+        <where>
+            a.article_id= #{articleId} and a.del_flag = 0
+        </where>
+    </select>
+    <select id="getFollowArticleList" resultType="org.example.htuoj.common.dto.resp.ArticleGetArticleListRespDTO"
+            parameterType="org.example.htuoj.common.dto.req.ArticleGetArticleListReqDTO">
+        select a.article_id                                   as articleId,
+               a.title,
+               a.content,
+               a.user_id                                      as userId,
+               u.user_name                                    as userName,
+               u.avatar,
+               a.like_count                                   as likeCount,
+               case when l.state = 0 then true else false end as isLike,
+               a.collect_count                                as collectCount,
+               case when c.state = 0 then true else false end as isCollect,
+               a.comment_count                                as commentCount,
+               a.watch_count                                  as watchCount,
+               a.cover_url                                    as coverUrl,
+               a.category_id                                  as categoryId
+        from article a
+                 left join user u on a.user_id = u.id
+                 left join `like` l
+                           on l.user_id = #{userId} and l.target_type = #{targetType} and l.target_id = a.article_id and
+                              l.del_flag = 0
+                 left join collect c
+                           on c.user_id = #{userId} and c.target_type = #{targetType} and c.target_id = a.article_id and
+                              c.del_flag = 0
+                 left join follow f on f.follow_to = a.user_id and f.follow_form = #{userId} and f.del_flag = 0
+        where a.del_flag = 0
+          and f.del_flag = 0
+        order by a.create_time desc
+    </select>
+    <select id="getArticleListByUserId"
+            resultType="org.example.htuoj.common.dto.resp.ArticleGetArticleListByUserIdRespDTO">
+        select a.article_id as articleId,
+        a.title,
+        a.content,
+        a.user_id as userId,
+        u.user_name as userName,
+        u.avatar,
+        a.like_count as likeCount,
+        case when l.state = 0 then true else false end as isLike,
+        a.collect_count as collectCount,
+        case when c.state = 0 then true else false end as isCollect,
+        a.comment_count as commentCount,
+        a.watch_count as watchCount,
+        a.cover_url as coverUrl,
+        a.category_id as categoryId,
+        a.create_time as createTime,
+        a.problem_id as problemId,
+        problem.title as problemTitle
+        from article a
+        left join user u on a.user_id = u.id
+        left join problem on a.problem_id = problem.id and problem.del_flag = 0
+        left join `like` l on l.user_id = #{myUserId} and l.target_type = #{targetType} and l.target_id = a.article_id
+        and l.del_flag = 0
+        left join collect c on c.user_id = #{myUserId} and c.target_type = #{targetType} and c.target_id = a.article_id and c.del_flag = 0
+        <where>
+            a.del_flag = 0
+            and a.user_id = #{userId}
+            <if test="categoryId != null and categoryId !=''">
+                and a.category_id = #{categoryId}
+            </if>
+        </where>
+        order by a.create_time desc
+    </select>
+    <select id="getArticleListByCategory"
+            resultType="org.example.htuoj.common.dto.resp.ArticleGetArticleListByCategoryRespDTO">
+        select a.article_id as articleId,
+        a.title,
+        a.content,
+        a.user_id as userId,
+        u.user_name as userName,
+        u.avatar,
+        a.like_count as likeCount,
+        case when l.state = 0 then true else false end as isLike,
+        a.collect_count as collectCount,
+        case when c.state = 0 then true else false end as isCollect,
+        a.comment_count as commentCount,
+        a.watch_count as watchCount,
+        a.category_id as categoryId
+        from article a
+        left join user u on a.user_id = u.id
+        left join `like` l on l.user_id = #{userId} and l.target_type = 0 and l.target_id = a.article_id and
+        l.del_flag = 0
+        left join collect c on c.user_id = #{userId} and c.target_type = 0 and c.target_id = a.article_id
+        and c.del_flag = 0
+        <where>
+            a.del_flag = 0
+            and a.category_id = #{categoryId}
+            and a.problem_id = #{problemId}
+        </where>
+        order by a.watch_count desc
+    </select>
+</mapper>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.AwardInfoMapper">
+    <resultMap id="BaseResultMap" type="org.example.htuoj.common.dto.resp.AwardInfoGetAllRespDTO">
+
+        <result column="student_name" jdbcType="VARCHAR" property="studentName"/>
+        <result column="student_number" jdbcType="BIGINT" property="studentNumber"/>
+        <result column="student_college" jdbcType="VARCHAR" property="studentCollege"/>
+        <result column="competition_name" jdbcType="VARCHAR" property="competitionName"/>
+        <result column="track_name" jdbcType="VARCHAR" property="trackName"/>
+        <result column="award_level" jdbcType="VARCHAR" property="awardLevel"/>
+        <result column="award_time" jdbcType="VARCHAR" property="awardTime"/>
+    </resultMap>
+    <select id="getAllList" resultMap="BaseResultMap">
+        select
+        a.student_name,
+        a.student_number,
+        a.student_college,
+        a.competition_name,
+        a.track_name,
+        a.award_level,
+        a.award_time
+        from award_info a
+        left join user u
+        on a.student_number = u.number
+        <where>
+            <if test="studentName != null and studentName != ''">
+                and a.student_name like concat('%', #{studentName}, '%')
+            </if>
+            <if test="studentNumber != null and studentNumber != ''">
+                and a.student_number = like concat('%', #{reqDTO.studentNumber}, '%')
+            </if>
+            <if test="studentCollege != null and studentCollege != ''">
+                and a.student_college = #{studentCollege}
+            </if>
+            <if test="competitionName != null and competitionName != ''">
+                and a.competition_name like concat('%', #{competitionName}, '%')
+            </if>
+            <if test="trackName != null and trackName != ''">
+                and a.track_name like concat('%', #{trackName}, '%')
+            </if>
+            <if test="awardLevel != null and awardLevel != ''">
+                and a.award_level like concat('%', #{awardLevel}, '%')
+            </if>
+            <if test="awardTime != null and awardTime != ''">
+                and a.award_time like concat('%', #{awardTime}, '%')
+            </if>
+            <if test="true">
+                and a.del_flag = 0
+            </if>
+        </where>
+        <if test="orderBy != null and orderBy != ''">
+            <if test="orderBy =='awardLevel' and sortOrder =='ascending'  ">
+                order by a.award_level asc
+            </if>
+            <if test="orderBy =='awardLevel' and sortOrder =='descending'  ">
+                order by a.award_level desc
+            </if>
+            <if test="orderBy =='awardTime' and sortOrder =='ascending'  ">
+                order by a.award_time asc
+            </if>
+            <if test="orderBy =='awardTime' and sortOrder =='descending'  ">
+                order by a.award_time desc
+            </if>
+        </if>
+        <if test="orderBy == null or orderBy == ''">
+            order by a.award_time desc
+        </if>
+    </select>
+    <select id="getAllList2" resultMap="BaseResultMap"
+            resultType="org.example.htuoj.common.dto.resp.AwardInfoGetAllRespDTO">
+        select u.id ,
+        a.student_name,
+        a.competition_name,
+        a.track_name,
+        a.award_level,
+        a.award_time
+        from award_info a
+        left join user u
+        on a.student_number = u.number
+        <where>
+            <if test="studentName != null and studentName != ''">
+                and a.student_name like concat('%', #{studentName}, '%')
+            </if>
+            <if test="competitionName != null and competitionName != ''">
+                and a.competition_name = #{competitionName}
+            </if>
+            <if test="trackName != null and trackName != ''">
+                and a.track_name = #{trackName}
+            </if>
+            <if test="awardLevel != null and awardLevel.size() > 0 ">
+                and a.award_level in
+                <foreach item="level" index="index" collection="awardLevel" open="(" separator="," close=")">
+                    #{level}
+                </foreach>
+            </if>
+            <if test="awardTime != null and awardTime != ''">
+                and a.award_time like concat('%', #{awardTime}, '%')
+            </if>
+            <if test="true">
+                and a.del_flag = 0
+            </if>
+        </where>
+        <if test="orderBy != null and orderBy != ''">
+            <if test="orderBy =='awardLevel' and sortOrder =='ascending'  ">
+                order by a.award_level asc, a.id asc
+            </if>
+            <if test="orderBy =='awardLevel' and sortOrder =='descending'  ">
+                order by a.award_level desc, a.id asc
+            </if>
+            <if test="orderBy =='awardTime' and sortOrder =='ascending'  ">
+                order by a.award_time asc, a.id asc
+            </if>
+            <if test="orderBy =='awardTime' and sortOrder =='descending'  ">
+                order by a.award_time desc, a.id asc
+            </if>
+        </if>
+        <if test="orderBy == null or orderBy == ''">
+            order by a.award_time desc, a.id asc
+        </if>
+
+    </select>
+    <select id="getTrackNameList" resultType="java.lang.String">
+        select distinct track_name
+        from award_info
+        where del_flag = 0
+    </select>
+    <select id="getCompetitionNameList" resultType="java.lang.String">
+        select distinct competition_name
+        from award_info
+        where del_flag = 0
+    </select>
+
+</mapper>

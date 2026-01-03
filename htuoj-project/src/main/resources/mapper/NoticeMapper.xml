@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.NoticeMapper">
+
+
+    <select id="getNoticeList" resultType="org.example.htuoj.common.dto.resp.NoticeGetNoticeListRespDTO">
+        select n.notice_id as noticeId,
+        n.sender_id as senderId,
+        u.user_name as userName,
+        u.avatar as avatar,
+        n.create_time as createTime,
+        n.target_type as targetType,
+        n.target_id as targetId,
+        n.is_read as isRead,
+        IF(f.state = 0, true, false) as isFollowedByMe,
+        IF(n.target_type = 0 or n.target_type = 5, a.article_id, c.article_id) as articleId,
+        IF(n.target_type = 0 or n.target_type = 5 , a.title, a1.title) as articleTitle,
+        IF(n.target_type = 1 or n.target_type = 2 or n.target_type = 3, c.content, null) as commentContent,
+        IF(n.target_type = 6, t.title, null) as trainingTitle,
+        IF(n.target_type = 6, t.training_id, null) as trainingId
+        from notice n
+        left join user u on n.sender_id = u.id
+        left join training t
+        on n.target_type = 6 and n.target_id = t.training_id and t.del_flag = 0
+        left join follow f
+        on n.target_type = 4 and f.follow_form = #{receiverId} and f.follow_to = n.sender_id and
+        f.del_flag = 0 and f.state = 0
+        left join article a
+        on (n.target_type = 0 or n.target_type = 2 or n.target_type = 5) and n.target_id = a.article_id and a.del_flag =
+        0
+        left join comment c
+        on (n.target_type = 1 or n.target_type = 2 or n.target_type = 3) and n.target_id = c.comment_id and
+        c.del_flag = 0
+        left join article a1
+        on c.article_id = a1.article_id and a1.del_flag = 0
+        <where>
+            n.receiver_id = #{receiverId}
+            and n.del_flag = 0
+            and n.is_read = #{isRead}
+            <if test="targetTypeList != null and targetTypeList.size() > 0">
+                and n.target_type in
+                <foreach collection="targetTypeList" item="targetType" open="(" separator="," close=")">
+                    #{targetType}
+                </foreach>
+            </if>
+        </where>
+        order by n.create_time desc
+    </select>
+</mapper>

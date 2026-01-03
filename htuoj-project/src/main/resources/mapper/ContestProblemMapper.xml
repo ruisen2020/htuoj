@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.ContestProblemMapper">
+
+    <select id="getContestProblemList"
+            resultType="org.example.htuoj.common.dto.resp.ContestProblemGetListRespDTO">
+        select cp.problem_id                                                                                       as problemId,
+               p.title                                                                                             as problemTitle,
+               cp.display_id                                                                                       as displayId,
+               cp.accept_count                                                                                     as acceptCount,
+               cp.submit_count                                                                                     as submitCount,
+               case
+                   when accept_status.status = 1 then true
+                   when accept_status.status = 2 then false
+                   else NULL end                                                                                   as isAccepted
+        from contest_problem cp
+                 left join problem p on cp.problem_id = p.id
+                 left join accept_status
+                           on accept_status.problem_id = cp.problem_id and accept_status.user_id = #{userId} and
+                              accept_status.del_flag = 0
+        where cp.contest_id = #{contestId}
+          and cp.del_flag = 0
+    </select>
+</mapper>

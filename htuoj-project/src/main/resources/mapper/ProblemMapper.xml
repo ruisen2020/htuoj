@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.ProblemMapper">
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        insert into Problem (title, content, input_description, output_description, difficulty_level,
+                             time_limit, memory_limit)
+        values (#{title}, #{content}, #{inputDescription}, #{outputDescription}, #{difficultyLevel},
+                #{timeLimit}, #{memoryLimit})
+    </insert>
+
+    <resultMap id="BaseResultMap" type="org.example.htuoj.common.dto.resp.ProblemPageRespDTO">
+        <id column="id" jdbcType="BIGINT" property="problemId"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="submit_count" jdbcType="BIGINT" property="submitCount"/>
+        <result column="accept_count" jdbcType="BIGINT" property="acceptCount"/>
+        <result column="difficulty_level" jdbcType="VARCHAR" property="difficultyLevel"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="labels" jdbcType="VARCHAR" property="labels"/>
+        <result column="sources" jdbcType="VARCHAR" property="sources"/>
+    </resultMap>
+
+    <select id="getAll" resultMap="BaseResultMap">
+        select p.id,
+        p.accept_count,
+        p.submit_count,
+        p.title,
+        p.difficulty_level,
+        group_concat(DISTINCT l.label_name) as labels,
+        group_concat(DISTINCT s.source_name) as sources,
+        accept_status.status
+        from problem p
+        left join problem_label_relations pl on pl.problem_id = p.id and pl.del_flag = 0
+        left join label l on pl.label_id = l.id and l.del_flag = 0
+        left join problem_source_relations ps on ps.problem_id = p.id and ps.del_flag = 0
+        left join source s on ps.source_id = s.id and s.del_flag = 0
+        left join accept_status on accept_status.problem_id = p.id and accept_status.user_id = #{userId} and
+        accept_status.del_flag = 0
+        <where>
+            p.del_flag = 0 and p.state = 0
+            <if test="difficultyLevel != null">
+                and p.difficulty_level = #{difficultyLevel}
+            </if>
+            <if test="status != null">
+                and accept_status.status = #{status}
+            </if>
+            <if test="labels != null and labels.size() > 0">
+                and CAST(l.id AS CHAR) in
+                <foreach item="labelId" collection="labels" open="(" separator="," close=")">
+                    #{labelId}
+                </foreach>
+            </if>
+            <if test="sources != null and sources.size() > 0">
+                and CAST(s.id AS CHAR) in
+                <foreach item="sourceId" collection="sources" open="(" separator="," close=")">
+                    #{sourceId}
+                </foreach>
+            </if>
+            <if test="search != null and search != ''">
+                and (CAST(p.id AS CHAR) LIKE CONCAT('%', #{search}, '%') OR p.title LIKE CONCAT('%', #{search}, '%'))
+            </if>
+
+        </where>
+        group by p.id, accept_status.status
+
+
+    </select>
+    <select id="getProblemById" resultType="org.example.htuoj.common.dto.resp.ProblemGetByIdRespDTO"
+            parameterType="java.lang.Long">
+        select p.id                                 as problemId,
+               p.title,
+               p.content,
+               p.input_description                  as inputDescription,
+               p.output_description                 as outputDescription,
+               p.difficulty_level                   as difficultyLevel,
+               p.time_limit                         as timeLimit,
+               p.memory_limit                       as memoryLimit,
+               p.submit_count                       as submitCount,
+               p.accept_count                       as acceptCount,
+               p.note,
+               group_concat(DISTINCT s.source_name) as sources,
+               group_concat(DISTINCT l.label_name)  as labels
+        from problem p
+                 left join problem_label_relations pl on pl.problem_id = p.id and pl.del_flag = 0
+                 left join label l on pl.label_id = l.id and l.del_flag = 0
+                 left join problem_source_relations ps on ps.problem_id = p.id and ps.del_flag = 0
+                 left join source s on ps.source_id = s.id and s.del_flag = 0
+        where p.id = #{problemId}
+          and p.del_flag = 0
+        group by p.id;
+    </select>
+    <select id="getProblemSimpleById" resultType="org.example.htuoj.common.dto.resp.ProblemPageRespDTO"
+            parameterType="java.lang.Long">
+        select p.id                                 as problemId,
+               p.title,
+               p.difficulty_level                   as difficultyLevel,
+               p.submit_count                       as submitCount,
+               p.accept_count                       as acceptCount,
+               group_concat(DISTINCT s.source_name) as sources,
+               group_concat(DISTINCT l.label_name)  as labels
+        from problem p
+                 left join problem_label_relations pl on pl.problem_id = p.id and pl.del_flag = 0
+                 left join label l on pl.label_id = l.id and l.del_flag = 0
+                 left join problem_source_relations ps on ps.problem_id = p.id and ps.del_flag = 0
+                 left join source s on ps.source_id = s.id and s.del_flag = 0
+        where p.id = #{problemId}
+          and p.del_flag = 0
+        group by p.id;
+    </select>
+
+    <!--    <select id="getLabelsAndSources" resultMap="BaseResultMap">-->
+<!--        select p.id,-->
+<!--        group_concat(l.label_name) as labels,-->
+<!--        group_concat(s.source_name) as sources-->
+<!--        from problem p-->
+<!--        left join problem_label_relations pl on pl.problem_id = p.id-->
+<!--        left join label l on pl.label_id = l.id-->
+<!--        left join problem_source_relations ps on ps.problem_id = p.id-->
+<!--        left join source s on ps.source_id = s.id-->
+<!--        left join accept_status on accept_status.problem_id = p.id-->
+<!--        <where>-->
+<!--            <if test="problemIds != null and problemIds.size() > 0">-->
+<!--                and p.id in-->
+<!--                <foreach item="problemId" collection="problemIds" open="(" separator="," close=")">-->
+<!--                    #{problemId}-->
+<!--                </foreach>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        group by p.id-->
+<!--    </select>-->
+
+<!--    <select id="getCount" resultType="long">-->
+<!--        select count(*)-->
+<!--        from (select p.id,-->
+<!--        p.accept_count,-->
+<!--        p.submit_count,-->
+<!--        p.title,-->
+<!--        p.difficulty_level,-->
+<!--        group_concat(l.label_name) as labels,-->
+<!--        group_concat(s.source_name) as sources,-->
+<!--        accept_status.status-->
+<!--        from problem p-->
+<!--        left join problem_label_relations pl on pl.problem_id = p.id-->
+<!--        left join label l on pl.label_id = l.id-->
+<!--        left join problem_source_relations ps on ps.problem_id = p.id-->
+<!--        left join source s on ps.source_id = s.id-->
+<!--        left join accept_status on accept_status.problem_id = p.id and accept_status.user_id = #{userId}-->
+<!--        <where>-->
+<!--            &lt;!&ndash;            <if test="userId != null">&ndash;&gt;-->
+<!--            &lt;!&ndash;                and accept_status.user_id = #{userId}&ndash;&gt;-->
+<!--            &lt;!&ndash;            </if>&ndash;&gt;-->
+<!--            <if test="difficultyLevel != null">-->
+<!--                and p.difficulty_level = #{difficultyLevel}-->
+<!--            </if>-->
+<!--            <if test="status != null">-->
+<!--                and accept_status.status = #{status}-->
+<!--            </if>-->
+<!--            <if test="labels != null and labels.size() > 0">-->
+<!--                and CAST(l.id AS CHAR) in-->
+<!--                <foreach item="labelId" collection="labels" open="(" separator="," close=")">-->
+<!--                    #{labelId}-->
+<!--                </foreach>-->
+<!--            </if>-->
+<!--            <if test="sources != null and sources.size() > 0">-->
+<!--                and CAST(s.id AS CHAR) in-->
+<!--                <foreach item="sourceId" collection="sources" open="(" separator="," close=")">-->
+<!--                    #{sourceId}-->
+<!--                </foreach>-->
+<!--            </if>-->
+<!--            <if test="search != null and search != ''">-->
+<!--                and (CAST(p.id AS CHAR) LIKE CONCAT('%', #{search}, '%') OR p.title LIKE CONCAT('%', #{search}, '%'))-->
+<!--            </if>-->
+
+<!--        </where>-->
+<!--        group by p.id, accept_status.status) as t;-->
+
+
+<!--    </select>-->
+</mapper>

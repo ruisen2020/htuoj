@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.ContestMapper">
+
+    <select id="getContestList" resultType="org.example.htuoj.common.dto.resp.ContestGetListRespDTO">
+        SELECT
+        c.contest_id AS contestId,
+        title,
+        start_time AS startTime,
+        end_time AS endTime,
+        duration,
+        status,
+        register_sum AS registerSum,
+        GROUP_CONCAT(DISTINCT cm.user_id) AS makers,
+        GROUP_CONCAT(DISTINCT u.user_name SEPARATOR ',') AS usernames,
+        case when cr.user_id IS NOT NULL then true else false end as isRegister
+        FROM
+        contest c
+        left join contest_maker cm on c.contest_id = cm.contest_id and cm.del_flag = 0
+        left join user u on cm.user_id = u.id and u.del_flag = 0
+        left join contest_register cr on c.contest_id = cr.contest_id and cr.user_id = #{userId} and cr.del_flag = 0
+        WHERE
+        c.del_flag = 0
+        group by c.contest_id
+        order by c.start_time desc
+<!--        <if test="title != null and title != ''">-->
+<!--            AND title LIKE CONCAT('%', #{title}, '%')-->
+<!--        </if>-->
+    </select>
+    <select id="getContestById" resultType="org.example.htuoj.common.dto.resp.ContestGetListRespDTO">
+
+        SELECT c.contest_id                                              AS contestId,
+               title,
+               start_time                                                AS startTime,
+               end_time                                                  AS endTime,
+               duration,
+               description,
+               status,
+               register_sum                                              AS registerSum,
+               GROUP_CONCAT(DISTINCT cm.user_id)                         AS makers,
+               GROUP_CONCAT(DISTINCT u.user_name SEPARATOR ',')          AS usernames,
+               case when cr.user_id IS NOT NULL then true else false end as isRegister
+        FROM contest c
+                 left join contest_maker cm on c.contest_id = cm.contest_id and cm.del_flag = 0
+                 left join user u on cm.user_id = u.id and u.del_flag = 0
+                 left join contest_register cr
+                           on c.contest_id = cr.contest_id and cr.user_id = #{userId} and cr.del_flag = 0
+        WHERE c.del_flag = 0
+          and c.contest_id = #{contestId}
+        group by c.contest_id
+    </select>
+</mapper>

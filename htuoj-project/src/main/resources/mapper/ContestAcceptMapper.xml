@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.ContestAcceptMapper">
+
+    <select id="getRankList" resultType="org.example.htuoj.common.dto.resp.ContestGetRankListRespDTO">
+        select u.user_name as userName,
+        u.id as userId,
+        u.avatar,
+        u.number,
+        s.school_name as schoolName,
+        cr.accept_sum as acceptSum,
+        cr.penalty_time as penaltyTimeSum
+        from contest_register cr
+        left join user u on cr.user_id = u.id
+        left join school s on u.school_id = s.school_id
+        left join contest c on cr.contest_id = c.contest_id
+        <where>
+            cr.contest_id = #{contestId}
+            <if test="userName != null and userName != ''">
+                and u.user_name like concat('%',#{userName},'%')
+            </if>
+            <if test="schoolId.size() > 0 and provinceId.size() > 0 ">
+                <if test="provinceId.size() > 0">
+                    and s.province_id in
+                    <foreach item="provinceId" collection="provinceId" open="(" separator="," close=")">
+                        #{provinceId}
+                    </foreach>
+                </if>
+            </if>
+
+            <if test="schoolId.size() > 0 and provinceId.size() == 0 ">
+                <if test="schoolId.size() > 0">
+                    and u.school_id in
+                    <foreach item="schoolId" collection="schoolId" open="(" separator="," close=")">
+                        #{schoolId}
+                    </foreach>
+                </if>
+            </if>
+            <if test="schoolId.size() == 0 and provinceId.size() > 0 ">
+                <if test="provinceId.size() > 0">
+                    and s.province_id in
+                    <foreach item="provinceId" collection="provinceId" open="(" separator="," close=")">
+                        #{provinceId}
+                    </foreach>
+                </if>
+            </if>
+        </where>
+
+    </select>
+    <select id="getPassList" resultType="org.example.htuoj.common.dao.PassProblemDetail">
+        select cp.display_id   as displayId,
+               ca.problem_id   as problemId,
+               ca.is_accept    as isAccept,
+               ca.wa_sum       as waSum,
+               ca.penalty_time as penaltyTime,
+               ca.submission_id as submissionId
+        from contest_accept ca
+                 left join contest_problem cp on ca.contest_id = cp.contest_id and ca.problem_id = cp.problem_id
+        where ca.user_id = #{userId}
+          and ca.contest_id = #{contestId}
+          and ca.del_flag = 0
+    </select>
+
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.htuoj.common.mapper.SubmissionMapper">
+
+    <select id="getSubmissionList" resultType="org.example.htuoj.common.dto.resp.SubmissionGetListRespDTO">
+
+        select submission_id as submissionId,
+        user_id as userId,
+        problem_id as problemId,
+        p.title as problemTitle,
+        status,
+        time,
+        memory,
+        s.create_time as createTime,
+        language,
+        p.title as problemTitle
+        from submission s
+        left join problem p on s.problem_id = p.id and p.del_flag = 0
+        <where>
+            s.user_id = #{userId}
+            and s.del_flag = 0
+            <if test="status!= null and status !='' ">
+                and s.status = #{status}
+            </if>
+            <if test="language != null ">
+                and s.language = #{language}
+            </if>
+            <if test="search!= null and search != ''">
+                and (p.title like concat('%',#{search},'%') or p.id like concat('%',#{search},'%'))
+            </if>
+        </where>
+        order by s.create_time desc
+    </select>
+    <select id="getSubmissionListByContestId"
+            resultType="org.example.htuoj.common.dto.resp.SubmissionGetListRespDTO">
+        select submission_id as submissionId,
+        u.id as userId,
+        u.user_name as userName,
+        s.problem_id as problemId,
+        p.title as problemTitle,
+        s.status,
+        s.time,
+        s.memory,
+        s.create_time as createTime,
+        s.language,
+        p.title as problemTitle
+        from submission s
+        left join problem p on s.problem_id = p.id and p.del_flag = 0
+        left join user u on s.user_id = u.id and u.del_flag = 0
+        <where>
+            s.contest_id = #{contestId}
+            and s.del_flag = 0
+            <if test="status!= null and status !='' ">
+                and s.status = #{status}
+            </if>
+            <if test="language != null ">
+                and s.language = #{language}
+            </if>
+            <if test="problemId != null">
+                and s.problem_id = #{problemId}
+            </if>
+            <if test="search!= null and search != ''">
+                and ( u.user_name like concat('%',#{search},'%'))
+            </if>
+        </where>
+        order by s.create_time desc
+    </select>
+</mapper>
